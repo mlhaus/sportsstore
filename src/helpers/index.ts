@@ -15,6 +15,11 @@ export const createTemplates = (app: Express) => {
     // In Vercel: __dirname = /var/task/helpers, go up 1 level to /var/task/templates
     // In local dev: __dirname = dist/helpers, go up 1 level to dist/templates
     const templatesDir = join(__dirname, "../templates");
+    
+    if (process.env.VERCEL) {
+        console.log(`[VERCEL] __dirname = ${__dirname}`);
+        console.log(`[VERCEL] templatesDir = ${templatesDir}`);
+    }
 
     app.set("views", templatesDir);
     app.engine("handlebars", engine({
