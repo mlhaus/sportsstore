@@ -44,13 +44,23 @@ const order_helpers = __importStar(require("./order_helpers"));
 const admin_helpers = __importStar(require("./admin_helpers"));
 const config = (0, config_1.getConfig)("templates:config");
 const createTemplates = (app) => {
-    // Resolve templates directory path relative to dist
-    // In Vercel: __dirname = /var/task/helpers, go up 1 level to /var/task/templates
-    // In local dev: __dirname = dist/helpers, go up 1 level to dist/templates
-    const templatesDir = (0, path_1.join)(__dirname, "../templates");
+    // Resolve templates directory path relative to __dirname
+    // In Vercel: __dirname = /var/task/dist/helpers
+    //   - ../.. = /var/task/dist
+    //   - ../../.. = /var/task/ (then ../templates = /var/task/templates)
+    // In local dev: __dirname = dist/helpers
+    //   - ../.. = dist
+    //   - ../../.. would go to parent, use ../ instead = dist/templates
+    let templatesDir;
     if (process.env.VERCEL) {
+        // In Vercel, go up 3 levels to escape dist/ nesting: dist/helpers -> /var/task/templates
+        templatesDir = (0, path_1.join)(__dirname, "../../../templates");
         console.log(`[VERCEL] __dirname = ${__dirname}`);
         console.log(`[VERCEL] templatesDir = ${templatesDir}`);
+    }
+    else {
+        // In local dev, go up 1 level: dist/helpers -> dist/templates
+        templatesDir = (0, path_1.join)(__dirname, "../templates");
     }
     app.set("views", templatesDir);
     app.engine("handlebars", (0, express_handlebars_1.engine)({
