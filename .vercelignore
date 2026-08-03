@@ -1,0 +1,13 @@
+node_modules
+.git
+.gitignore
+.idea
+src
+tsconfig.json
+webpack.config.mjs
+*.env
+*.db
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
