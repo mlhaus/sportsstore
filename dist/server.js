@@ -35,3 +35,4 @@ if ((0, config_1.getEnvironment)() === config_1.Env.Development) {
 }
 (0, errors_1.createErrorHandlers)(expressApp);
 server.listen(port, () => console.log(`HTTP Server listening on port ${port}`));
+exports.default = expressApp;

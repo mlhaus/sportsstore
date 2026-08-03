@@ -45,12 +45,12 @@
     },
     "auth": {
         "openauth": {
-            "redirectionUrl": "http://localhost:3000/signin-google"
+            "redirectionUrl": "https://sportsstore-pi.vercel.app/signin-google"
         }
     },
     "admin": {
         "openauth": {
-            "redirectionUrl": "http://localhost:3000/auth-signin-google"
+            "redirectionUrl": "https://sportsstore-pi.vercel.app/auth-signin-google"
         },
         "users": ["alice@example.com", "marc.hauschildt@gmail.com"]
     }

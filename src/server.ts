@@ -42,3 +42,5 @@ createErrorHandlers(expressApp);
 
 server.listen(port, 
     () => console.log(`HTTP Server listening on port ${port}`));
+
+export default expressApp;

@@ -7,7 +7,8 @@
         "watch": "tsc-watch --noClear --onsuccess \"node dist/server.js\"",
         "server": "nodemon --exec npm run watch",
         "client": "webpack serve",
-        "start": "npm-run-all --parallel server client"
+        "build": "tsc && webpack --mode production",
+        "start": "node dist/server.js"
     },
     "nodemonConfig": {
         "ext": "js,handlebars,json",
