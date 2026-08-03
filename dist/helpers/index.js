@@ -45,8 +45,8 @@ const admin_helpers = __importStar(require("./admin_helpers"));
 const config = (0, config_1.getConfig)("templates:config");
 const createTemplates = (app) => {
     // Resolve templates directory path relative to dist
-    // In production (Vercel), templates are in dist/templates
-    // In development, they're in templates/
+    // In Vercel: __dirname = /var/task/helpers, go up 1 level to /var/task/templates
+    // In local dev: __dirname = dist/helpers, go up 1 level to dist/templates
     const templatesDir = (0, path_1.join)(__dirname, "../templates");
     app.set("views", templatesDir);
     app.engine("handlebars", (0, express_handlebars_1.engine)({
