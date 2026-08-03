@@ -8,6 +8,7 @@ import { createErrorHandlers } from "./errors";
 import { createSessions } from "./sessions";
 import { createAuthentication } from "./authentication";
 import httpProxy from "http-proxy";
+import { join } from "path";
 
 const port = getConfig("http:port", 3000);
 
@@ -17,9 +18,12 @@ expressApp.use(helmet(getConfig("http:content_security", {})));
 expressApp.use(express.json());
 expressApp.use(express.urlencoded({extended: true}))
 
-expressApp.use(express.static("node_modules/bootstrap/dist"));
-expressApp.use(express.static("node_modules/bootstrap-icons"));
-expressApp.use(express.static("node_modules/htmx.org/dist"));
+// Serve static files from node_modules
+// In Vercel: __dirname = /var/task/dist, so we need to go up to /var/task/node_modules
+// In local: __dirname = dist, so we need to go up to ./node_modules
+expressApp.use(express.static(join(__dirname, "../node_modules/bootstrap/dist")));
+expressApp.use(express.static(join(__dirname, "../node_modules/bootstrap-icons")));
+expressApp.use(express.static(join(__dirname, "../node_modules/htmx.org/dist")));
 
 createTemplates(expressApp);
 createSessions(expressApp);
