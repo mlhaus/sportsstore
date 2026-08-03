@@ -38,6 +38,20 @@ if (fs.existsSync(prodConfigSource)) {
 const templatesSource = path.join(__dirname, '..', 'templates');
 const templatesDest = path.join(distDir, 'templates');
 
+function copyFile(src, dest, label) {
+    const destDir = path.dirname(dest);
+    if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true });
+    }
+
+    if (fs.existsSync(src)) {
+        fs.copyFileSync(src, dest);
+        console.log(`✓ Copied ${label}`);
+    } else {
+        console.warn(`⚠ Missing asset: ${src}`);
+    }
+}
+
 function copyDir(src, dest) {
     if (!fs.existsSync(dest)) {
         fs.mkdirSync(dest, { recursive: true });
@@ -63,5 +77,33 @@ if (fs.existsSync(templatesSource)) {
 } else {
     console.warn('⚠ templates directory not found');
 }
+
+// Copy frontend assets so Vercel can serve them from dist/
+copyFile(
+    path.join(__dirname, '..', 'node_modules', 'bootstrap', 'dist', 'css', 'bootstrap.min.css'),
+    path.join(distDir, 'css', 'bootstrap.min.css'),
+    'bootstrap.min.css to dist/css/'
+);
+
+copyFile(
+    path.join(__dirname, '..', 'node_modules', 'bootstrap-icons', 'font', 'bootstrap-icons.min.css'),
+    path.join(distDir, 'font', 'bootstrap-icons.min.css'),
+    'bootstrap-icons.min.css to dist/font/'
+);
+
+const bootstrapIconsFontsSource = path.join(__dirname, '..', 'node_modules', 'bootstrap-icons', 'font', 'fonts');
+const bootstrapIconsFontsDest = path.join(distDir, 'fonts');
+if (fs.existsSync(bootstrapIconsFontsSource)) {
+    copyDir(bootstrapIconsFontsSource, bootstrapIconsFontsDest);
+    console.log('✓ Copied bootstrap icon fonts to dist/fonts/');
+} else {
+    console.warn('⚠ bootstrap icon fonts directory not found');
+}
+
+copyFile(
+    path.join(__dirname, '..', 'node_modules', 'htmx.org', 'dist', 'htmx.min.js'),
+    path.join(distDir, 'htmx.min.js'),
+    'htmx.min.js to dist/'
+);
 
 console.log('✓ Asset copy complete');

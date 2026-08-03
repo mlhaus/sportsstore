@@ -18,12 +18,12 @@ expressApp.use(helmet(getConfig("http:content_security", {})));
 expressApp.use(express.json());
 expressApp.use(express.urlencoded({extended: true}))
 
-// Serve static files from node_modules
-// In Vercel: __dirname = /var/task/dist, so we need to go up to /var/task/node_modules
-// In local: __dirname = dist, so we need to go up to ./node_modules
-expressApp.use(express.static(join(__dirname, "../node_modules/bootstrap/dist")));
-expressApp.use(express.static(join(__dirname, "../node_modules/bootstrap-icons")));
-expressApp.use(express.static(join(__dirname, "../node_modules/htmx.org/dist")));
+expressApp.use("/css", express.static(join(__dirname, "css")));
+expressApp.use("/font", express.static(join(__dirname, "font")));
+expressApp.use("/fonts", express.static(join(__dirname, "fonts")));
+expressApp.use("/admin", express.static(join(__dirname, "admin")));
+expressApp.get("/htmx.min.js", (req, resp) =>
+    resp.sendFile(join(__dirname, "htmx.min.js")));
 
 createTemplates(expressApp);
 createSessions(expressApp);
