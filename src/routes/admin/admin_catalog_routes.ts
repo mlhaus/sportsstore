@@ -7,8 +7,8 @@ export const createAdminCatalogRoutes = (router: Router) => {
 
     router.get("/table", async (req, resp) => {
         const products = await ProductModel.find()
-                .populate("supplier")
-                .populate("category")
+                .populate("supplierId")
+                .populate("categoryId")
                 .lean();
         resp.render("admin/product_table", { products });
     });

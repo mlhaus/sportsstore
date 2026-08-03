@@ -20,8 +20,8 @@ function AddQueries(Base) {
                 : 0;
             const limit = params?.pageSize || 0;
             const products = await models_1.ProductModel.find(filter)
-                .populate("supplier")
-                .populate("category")
+                .populate("supplierId")
+                .populate("categoryId")
                 .skip(skip)
                 .limit(limit)
                 .lean();

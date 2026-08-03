@@ -6,11 +6,10 @@
       "use": "@vercel/node",
       "config": {
         "includeFiles": [
-          "dist/**",
           "dist/products.json",
           "dist/server.config.json",
           "dist/production.server.config.json",
-          "dist/templates/**"
+          "dist/templates/**/*"
         ]
       }
     }

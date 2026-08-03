@@ -6,8 +6,8 @@ const validation_1 = require("../../data/validation");
 const createAdminCatalogRoutes = (router) => {
     router.get("/table", async (req, resp) => {
         const products = await models_1.ProductModel.find()
-            .populate("supplier")
-            .populate("category")
+            .populate("supplierId")
+            .populate("categoryId")
             .lean();
         resp.render("admin/product_table", { products });
     });

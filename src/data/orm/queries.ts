@@ -25,8 +25,8 @@ export function AddQueries<TBase extends Constructor<BaseRepo>>(Base: TBase) {
             const limit = params?.pageSize || 0;
             
             const products = await ProductModel.find(filter)
-                .populate("supplier")
-                .populate("category")
+                .populate("supplierId")
+                .populate("categoryId")
                 .skip(skip)
                 .limit(limit)
                 .lean() as any[];
