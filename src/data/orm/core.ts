@@ -38,18 +38,34 @@ export class BaseRepo {
 
     async clearAndSeedData() {
         try {
-            // Try to find products.json in multiple locations
-            // 1. In dist directory (for Vercel)
-            // 2. In project root (for local development)
-            let seedFilePath = join(__dirname, '../../', config.seed_file);
+            // Try to find products.json in multiple locations:
+            // 1. Same directory as compiled core.js (dist/data/orm/)
+            // 2. dist/ directory (copied by copy-assets.js)
+            // 3. Project root (for local development)
+            const pathsToTry = [
+                join(__dirname, '../../../', config.seed_file),    // dist/products.json
+                join(__dirname, '../../../../', config.seed_file),  // project root/products.json
+                join(__dirname, '../../../../../../', config.seed_file) // fallback
+            ];
             
-            let fileContent: string;
-            try {
-                fileContent = readFileSync(seedFilePath).toString();
-            } catch (e) {
-                // If not found, try from parent directory
-                seedFilePath = join(__dirname, '../../../', config.seed_file);
-                fileContent = readFileSync(seedFilePath).toString();
+            let fileContent: string = '';
+            let seedFilePath: string | null = null;
+            
+            for (const tryPath of pathsToTry) {
+                try {
+                    fileContent = readFileSync(tryPath).toString();
+                    seedFilePath = tryPath;
+                    if (config.logging) {
+                        console.log(`Found seed file at: ${tryPath}`);
+                    }
+                    break;
+                } catch (e) {
+                    // Continue to next path
+                }
+            }
+            
+            if (!seedFilePath) {
+                throw new Error(`Could not find ${config.seed_file} in any expected location`);
             }
             
             const data = JSON.parse(fileContent);
