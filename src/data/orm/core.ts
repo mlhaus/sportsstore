@@ -38,14 +38,16 @@ export class BaseRepo {
 
     async clearAndSeedData() {
         try {
-            // Try to find products.json in multiple locations:
-            // 1. Same directory as compiled core.js (dist/data/orm/)
-            // 2. dist/ directory (copied by copy-assets.js)
-            // 3. Project root (for local development)
+            // In Vercel, __dirname is /var/task/data/orm/
+            // We need to find products.json at /var/task/products.json
+            // Try these paths:
+            // 1. Two levels up from orm/ -> /var/task/
+            // 2. Local dev: three levels up (dist/data/orm/ -> dist/ -> root/source/)
+            // 3. Very local dev: four levels up
             const pathsToTry = [
-                join(__dirname, '../../../', config.seed_file),    // dist/products.json
-                join(__dirname, '../../../../', config.seed_file),  // project root/products.json
-                join(__dirname, '../../../../../../', config.seed_file) // fallback
+                join(__dirname, '../../', config.seed_file),         // /var/task/products.json (Vercel)
+                join(__dirname, '../../../', config.seed_file),      // dist/products.json (local)
+                join(__dirname, '../../../../', config.seed_file)    // root/products.json (local dev)
             ];
             
             let fileContent: string = '';
@@ -61,6 +63,9 @@ export class BaseRepo {
                     break;
                 } catch (e) {
                     // Continue to next path
+                    if (config.logging) {
+                        console.log(`Seed file not found at: ${tryPath}`);
+                    }
                 }
             }
             

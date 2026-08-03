@@ -12,8 +12,8 @@ const config = getConfig("templates:config");
 
 export const createTemplates = (app: Express) => {
     // Resolve templates directory path relative to dist
-    // In production (Vercel), templates are in dist/templates
-    // In development, they're in templates/
+    // In Vercel: __dirname = /var/task/helpers, go up 1 level to /var/task/templates
+    // In local dev: __dirname = dist/helpers, go up 1 level to dist/templates
     const templatesDir = join(__dirname, "../templates");
 
     app.set("views", templatesDir);
