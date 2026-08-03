@@ -7,14 +7,20 @@ Object.defineProperty(exports, "getEnvironment", { enumerable: true, get: functi
 Object.defineProperty(exports, "Env", { enumerable: true, get: function () { return environment_1.Env; } });
 const merge_1 = require("./merge");
 const dotenv_1 = require("dotenv");
-const file = process.env.SERVER_CONFIG ?? "server.config.json";
-const data = JSON.parse((0, fs_1.readFileSync)(file).toString());
+const path_1 = require("path");
+// Resolve config file path relative to compiled code (dist/)
+// In Vercel: __dirname = /var/task/config, so ../server.config.json = /var/task/server.config.json
+// In local: __dirname = dist/config, so ../server.config.json = dist/server.config.json
+const configFileName = process.env.SERVER_CONFIG ?? "server.config.json";
+const configPath = (0, path_1.join)(__dirname, "..", configFileName);
+const data = JSON.parse((0, fs_1.readFileSync)(configPath).toString());
 (0, dotenv_1.config)({
     path: (0, environment_1.getEnvironment)().toString() + ".env"
 });
 try {
-    const envFile = (0, environment_1.getEnvironment)().toString() + "." + file;
-    const envData = JSON.parse((0, fs_1.readFileSync)(envFile).toString());
+    const envFile = (0, environment_1.getEnvironment)().toString() + "." + configFileName;
+    const envConfigPath = (0, path_1.join)(__dirname, "..", envFile);
+    const envData = JSON.parse((0, fs_1.readFileSync)(envConfigPath).toString());
     (0, merge_1.merge)(data, envData);
 }
 catch {
