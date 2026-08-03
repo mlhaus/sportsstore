@@ -42,10 +42,17 @@ const createAuthentication = (app) => {
         callback(null, user.adminUser ? JSON.stringify(user) : user.id);
     });
     passport_1.default.deserializeUser((id, callbackFunc) => {
-        if (typeof id == "string") {
-            callbackFunc(null, JSON.parse(id));
+        // Check if this is a JSON-serialized admin user
+        if (id.startsWith("{")) {
+            try {
+                callbackFunc(null, JSON.parse(id));
+            }
+            catch {
+                callbackFunc(null, null);
+            }
         }
         else {
+            // Regular user with MongoDB ObjectId
             data_1.customer_repository.getCustomer(id).then(user => callbackFunc(null, user));
         }
     });

@@ -1,7 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CustomerModel = void 0;
-const sequelize_1 = require("sequelize");
-class CustomerModel extends sequelize_1.Model {
-}
-exports.CustomerModel = CustomerModel;
+const mongoose_1 = require("mongoose");
+const customerSchema = new mongoose_1.Schema({
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    federatedId: { type: String }
+});
+exports.CustomerModel = (0, mongoose_1.model)("Customer", customerSchema);

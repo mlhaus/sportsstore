@@ -19,9 +19,9 @@ export const createCartMiddleware = (app: Express) => {
 export const createCartRoutes = (app: Express) => {
     
     app.post("/cart", (req, resp) => {
-        const productId = Number.parseInt(req.body.productId);
-        if (isNaN(productId)) {
-            throw new Error("ID  must be an integer");
+        const productId = req.body.productId?.toString();
+        if (!productId) {
+            throw new Error("ID is required");
         }
         addLine(req.session.cart as Cart, productId, 1);
         resp.redirect(`/cart?returnUrl=${escape(req.body.returnUrl ?? "/")}`);
@@ -36,8 +36,8 @@ export const createCartRoutes = (app: Express) => {
     });
 
     app.post("/cart/remove", (req, resp) => {
-        const id = Number.parseInt(req.body.id);
-        if (!isNaN(id)) {
+        const id = req.body.id?.toString();
+        if (id) {
             removeLine(req.session.cart as Cart, id);
         }
         resp.redirect(`/cart?returnUrl=${escape(req.body.returnUrl ?? "/")}`);

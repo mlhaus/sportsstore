@@ -55,10 +55,16 @@ export const createAuthentication = (app:Express) => {
         callback(null, user.adminUser ? JSON.stringify(user) : user.id);
     });
 
-    passport.deserializeUser((id: number | string , callbackFunc) => {
-        if (typeof id == "string") {
-            callbackFunc(null, JSON.parse(id));
+    passport.deserializeUser((id: string, callbackFunc) => {
+        // Check if this is a JSON-serialized admin user
+        if (id.startsWith("{")) {
+            try {
+                callbackFunc(null, JSON.parse(id));
+            } catch {
+                callbackFunc(null, null);
+            }
         } else {
+            // Regular user with MongoDB ObjectId
             customer_repository.getCustomer(id).then(user => 
                 callbackFunc(null, user));
         }

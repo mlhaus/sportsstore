@@ -1,12 +1,5 @@
-import { DataTypes, Sequelize } from "sequelize";
-import { CustomerModel } from "./customer_models";
-
-export const initializeCustomerModels = (sequelize: Sequelize) => {
-
-    CustomerModel.init({
-        id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true},
-        name: { type: DataTypes.STRING},        
-        email: { type: DataTypes.STRING },
-        federatedId: { type: DataTypes.STRING }
-    }, { sequelize})
+// Models are already defined in customer_models.ts
+// Mongoose handles the initialization automatically
+export const initializeCustomerModels = () => {
+    // No initialization needed - Mongoose models are defined at import time
 }

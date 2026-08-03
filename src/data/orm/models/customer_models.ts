@@ -1,13 +1,16 @@
-import { Model, CreationOptional, InferAttributes, InferCreationAttributes } 
-    from "sequelize";
-import { Customer } from "../../customer_models";
+import { Schema, model, Document } from "mongoose";
 
-export class CustomerModel extends Model<InferAttributes<CustomerModel>, 
-        InferCreationAttributes<CustomerModel>> implements Customer {
-
-    declare id?: CreationOptional<number>;
-    declare name: string;
-    declare email: string;
-
-    declare federatedId?: string;
+export interface ICustomer extends Document {
+    _id: any;
+    name: string;
+    email: string;
+    federatedId?: string;
 }
+
+const customerSchema = new Schema({
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    federatedId: { type: String }
+});
+
+export const CustomerModel = model<ICustomer>("Customer", customerSchema);

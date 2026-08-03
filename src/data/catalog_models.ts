@@ -1,22 +1,24 @@
 export interface  Product {
-    id?: number;
+    id?: string;
     name: string;
     description: string;
     price: number;
     
     category?: Category;
     supplier?: Supplier;
+    categoryId?: string;
+    supplierId?: string;
 }
 
 export interface Category {
-    id?: number;
+    id?: string;
     name: string;
 
     products?: Product[];
 }
 
 export interface Supplier {
-    id?: number;
+    id?: string;
     name: string;
     
     products?: Product[];
@@ -25,7 +27,7 @@ export interface Supplier {
 export interface ProductQueryParameters {
     pageSize?: number;
     page?: number;
-    category?: number;
+    category?: string;
     searchTerm?: string;
 }
 

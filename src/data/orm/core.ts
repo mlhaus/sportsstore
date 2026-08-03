@@ -1,41 +1,60 @@
-import { Sequelize } from "sequelize";
-import { getConfig } from "../../config";
+import mongoose from "mongoose";
+import { getConfig, getSecret } from "../../config";
 import { initializeModels, CategoryModel, ProductModel, SupplierModel } 
     from "./models";
 import { readFileSync } from "fs";
 
 const config = getConfig("catalog:orm_repo");
-const logging = config.logging 
-        ? { logging: console.log, logQueryParameters: true}
-        : { logging: false };
 
 export class BaseRepo {
-    sequelize: Sequelize; 
     
     constructor() {
-        this.sequelize = new Sequelize({ ...config.settings, ...logging })
         this.initModelsAndDatabase();
     }
 
     async initModelsAndDatabase() : Promise<void> {
-        initializeModels(this.sequelize);
-        if (config.reset_db) {
-            await this.sequelize.drop();
-            await this.sequelize.sync();
-            await this.addSeedData();
-        } else {
-            await this.sequelize.sync();            
-        }
-    }    
+        const mongoUri = getSecret("MONGODB_URI");
+        
+        try {
+            await mongoose.connect(mongoUri, {
+                dbName: "sportsstore"
+            });
+            
+            if (config.logging) {
+                console.log("Connected to MongoDB");
+            }
 
-    async addSeedData() {
+            initializeModels();
+
+            if (config.reset_db) {
+                await this.clearAndSeedData();
+            }
+        } catch (error) {
+            console.error("Failed to connect to MongoDB:", error);
+            throw error;
+        }
+    }
+
+    async clearAndSeedData() {
         const data = JSON.parse(readFileSync(config.seed_file).toString());
-        await this.sequelize.transaction(async (transaction) => {
-            await SupplierModel.bulkCreate(data.suppliers, { transaction });
-            await CategoryModel.bulkCreate(data.categories, { transaction });
-            await ProductModel.bulkCreate(data.products, { transaction });
-        });
-    }    
+        
+        try {
+            await SupplierModel.deleteMany({});
+            await CategoryModel.deleteMany({});
+            await ProductModel.deleteMany({});
+            
+            await SupplierModel.insertMany(data.suppliers);
+            await CategoryModel.insertMany(data.categories);
+            await ProductModel.insertMany(data.products);
+            
+            if (config.logging) {
+                console.log("Database seeded successfully");
+            }
+        } catch (error) {
+            console.error("Failed to seed database:", error);
+            throw error;
+        }
+    }
 }
 
 export type Constructor<T = {}> = new (...args: any[]) => T;

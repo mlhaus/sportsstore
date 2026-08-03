@@ -5,7 +5,7 @@ export interface CatalogRepository {
 
     getProducts(params?: ProductQueryParameters): Promise<ProductQueryResult>;
 
-    getProductDetails(ids: number[]): Promise<Product[]>;
+    getProductDetails(ids: string[]): Promise<Product[]>;
 
     storeProduct(p: Product): Promise<Product>;
 

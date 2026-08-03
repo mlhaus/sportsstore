@@ -15,7 +15,7 @@ const createOrderRoutes = (app) => {
         if (!req.session.orderData && req.user) {
             req.session.orderData = {
                 customer: await validation_1.CustomerValidator.validate(req.user),
-                address: await validation_1.AddressValidator.validate(await data_1.customer_repository.getCustomerAddress(req.user?.id ?? 0) ?? {})
+                address: await validation_1.AddressValidator.validate(await data_1.customer_repository.getCustomerAddress(req.user?.id ?? "") ?? {})
             };
         }
         req.session.pageSize =

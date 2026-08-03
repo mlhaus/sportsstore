@@ -1,5 +1,5 @@
 export interface CartLine {
-    productId: number;
+    productId: string;
     quantity: number;
 }
 
@@ -9,7 +9,7 @@ export interface Cart {
 
 export const createCart = () : Cart => ({ lines: [] });
 
-export const addLine = (cart: Cart, productId: number, quantity: number) => {
+export const addLine = (cart: Cart, productId: string, quantity: number) => {
     const line = cart.lines.find(l => l.productId == productId);
     if (line !== undefined) {
         line.quantity += quantity;
@@ -18,6 +18,6 @@ export const addLine = (cart: Cart, productId: number, quantity: number) => {
     }
 }
 
-export const removeLine = (cart: Cart, productId: number) => {
+export const removeLine = (cart: Cart, productId: string) => {
     cart.lines = cart.lines.filter(l => l.productId !== productId);
 }

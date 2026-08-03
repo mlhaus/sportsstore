@@ -2,47 +2,64 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AddQueries = AddQueries;
 const models_1 = require("./models");
-const sequelize_1 = require("sequelize");
 function AddQueries(Base) {
     return class extends Base {
         async getProducts(params) {
-            const opts = {};
-            if (params?.page && params.pageSize) {
-                opts.limit = params?.pageSize,
-                    opts.offset = (params.page - 1) * params.pageSize;
-            }
+            const filter = {};
             if (params?.searchTerm) {
-                const searchOp = { [sequelize_1.Op.like]: "%" + params.searchTerm + "%" };
-                opts.where = {
-                    [sequelize_1.Op.or]: { name: searchOp, description: searchOp }
-                };
+                filter.$or = [
+                    { name: { $regex: params.searchTerm, $options: "i" } },
+                    { description: { $regex: params.searchTerm, $options: "i" } }
+                ];
             }
             if (params?.category) {
-                opts.where = {
-                    ...opts.where, categoryId: params.category
-                };
+                filter.categoryId = params.category;
             }
-            const result = await models_1.ProductModel.findAndCountAll({
-                include: [
-                    { model: models_1.SupplierModel, as: "supplier" },
-                    { model: models_1.CategoryModel, as: "category" }
-                ],
-                raw: true, nest: true,
-                ...opts
-            });
+            const skip = params?.page && params?.pageSize
+                ? (params.page - 1) * params.pageSize
+                : 0;
+            const limit = params?.pageSize || 0;
+            const products = await models_1.ProductModel.find(filter)
+                .populate("supplier")
+                .populate("category")
+                .skip(skip)
+                .limit(limit)
+                .lean();
+            const totalCount = await models_1.ProductModel.countDocuments(filter);
             const categories = await this.getCategories();
-            return { products: result.rows, totalCount: result.count, categories };
+            return {
+                products: products.map(p => ({
+                    ...p,
+                    id: p._id.toString ? p._id.toString() : p._id,
+                    categoryId: p.categoryId?.toString ? p.categoryId.toString() : p.categoryId,
+                    supplierId: p.supplierId?.toString ? p.supplierId.toString() : p.supplierId
+                })),
+                totalCount,
+                categories
+            };
         }
-        getCategories() {
-            return models_1.CategoryModel.findAll({ raw: true, nest: true });
+        async getCategories() {
+            const results = await models_1.CategoryModel.find().lean();
+            return results.map(c => ({
+                ...c,
+                id: c._id.toString ? c._id.toString() : c._id
+            }));
         }
-        getSuppliers() {
-            return models_1.SupplierModel.findAll({ raw: true, nest: true });
+        async getSuppliers() {
+            const results = await models_1.SupplierModel.find().lean();
+            return results.map(s => ({
+                ...s,
+                id: s._id.toString ? s._id.toString() : s._id
+            }));
         }
-        getProductDetails(ids) {
-            return models_1.ProductModel.findAll({
-                where: { id: { [sequelize_1.Op.in]: ids } }, raw: true, nest: true,
-            });
+        async getProductDetails(ids) {
+            const results = await models_1.ProductModel.find({ _id: { $in: ids } }).lean();
+            return results.map(p => ({
+                ...p,
+                id: p._id.toString ? p._id.toString() : p._id,
+                categoryId: p.categoryId?.toString ? p.categoryId.toString() : p.categoryId,
+                supplierId: p.supplierId?.toString ? p.supplierId.toString() : p.supplierId
+            }));
         }
     };
 }

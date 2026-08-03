@@ -23,10 +23,6 @@
     }, 
     "catalog": {
         "orm_repo": {
-            "settings": {
-                "dialect": "sqlite",
-                "storage": "catalog.db"
-            },
             "logging": true,
             "reset_db": true,
             "seed_file": "products.json"            
@@ -34,14 +30,7 @@
     },
     "sessions": {
         "maxAgeHrs": 2,
-        "reset_db": true,
-        "orm": {
-            "settings": {
-                "dialect": "sqlite",
-                "storage": "sessions.db"
-            }, 
-            "logging": true
-        }
+        "logging": true
     },
     "auth": {
         "openauth": {

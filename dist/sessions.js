@@ -4,35 +4,33 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createSessions = void 0;
-const sequelize_1 = require("sequelize");
 const config_1 = require("./config");
 const express_session_1 = __importDefault(require("express-session"));
-const connect_session_sequelize_1 = __importDefault(require("connect-session-sequelize"));
+const connect_mongo_1 = __importDefault(require("connect-mongo"));
 const config = (0, config_1.getConfig)("sessions");
 const secret = (0, config_1.getSecret)("COOKIE_SECRET");
-const logging = config.orm.logging
-    ? { logging: console.log, logQueryParameters: true }
-    : { logging: false };
+const mongoUri = (0, config_1.getSecret)("MONGODB_URI");
 const createSessions = (app) => {
-    const sequelize = new sequelize_1.Sequelize({
-        ...config.orm.settings, ...logging
-    });
-    const store = new ((0, connect_session_sequelize_1.default)(express_session_1.default.Store))({
-        db: sequelize
-    });
-    if (config.reset_db === true) {
-        sequelize.drop().then(() => store.sync());
-    }
-    else {
-        store.sync();
-    }
-    app.use((0, express_session_1.default)({
-        secret, store,
-        resave: false, saveUninitialized: true,
+    const sessionConfig = {
+        secret,
+        resave: false,
+        saveUninitialized: true,
+        store: connect_mongo_1.default.create({
+            mongoUrl: mongoUri,
+            dbName: "sportsstore",
+            collectionName: "sessions",
+            touchAfter: 24 * 3600
+        }),
         cookie: {
             maxAge: config.maxAgeHrs * 60 * 60 * 1000,
-            sameSite: false, httpOnly: false, secure: false
+            sameSite: false,
+            httpOnly: false,
+            secure: false
         }
-    }));
+    };
+    if (config.logging) {
+        console.log("Session store configured for MongoDB");
+    }
+    app.use((0, express_session_1.default)(sessionConfig));
 };
 exports.createSessions = createSessions;

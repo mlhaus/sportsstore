@@ -7,27 +7,33 @@ import { ProductModel } from "../../data/orm/models";
 export const createAdminOrderRoutes = (router: Router) => {
 
     router.get("/table", async (req, resp) => {
-        const orders = (await OrderModel.findAll({
-            include: [
-                { model: CustomerModel, as: "customer"},
-                { model: AddressModel, as: "address"},
-                { model: ProductSelectionModel, as: "selections",
-                    include: [{ model: ProductModel, as: "product"}]
+        const orders = await OrderModel.find()
+            .populate("customer")
+            .populate("address")
+            .populate({
+                path: "selections",
+                populate: {
+                    path: "product"
                 }
-            ], 
-            order: ["shipped", "id"]
-        })).map(o => o.toJSON())
+            })
+            .sort({ shipped: 1, _id: 1 })
+            .lean();
 
         resp.render("admin/order_table", { orders });
     });
 
     router.post("/ship", async (req, resp) => {
         const { id, shipped } = req.body;
-        const [rows] = await  OrderModel.update({ shipped },{ where: { id }});
-        if (rows === 1) {
+        const result = await OrderModel.findByIdAndUpdate(
+            id,
+            { shipped },
+            { new: true }
+        );
+        
+        if (result) {
             resp.redirect(303, "/api/orders/table");
         } else {
-            throw new Error(`Expected 1 row updated, but got ${rows}`);
+            throw new Error(`Order not found: ${id}`);
         }
     });
 }

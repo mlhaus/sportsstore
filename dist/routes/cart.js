@@ -46,9 +46,9 @@ const createCartMiddleware = (app) => {
 exports.createCartMiddleware = createCartMiddleware;
 const createCartRoutes = (app) => {
     app.post("/cart", (req, resp) => {
-        const productId = Number.parseInt(req.body.productId);
-        if (isNaN(productId)) {
-            throw new Error("ID  must be an integer");
+        const productId = req.body.productId?.toString();
+        if (!productId) {
+            throw new Error("ID is required");
         }
         (0, cart_models_1.addLine)(req.session.cart, productId, 1);
         resp.redirect(`/cart?returnUrl=${(0, querystring_1.escape)(req.body.returnUrl ?? "/")}`);
@@ -61,8 +61,8 @@ const createCartRoutes = (app) => {
         });
     });
     app.post("/cart/remove", (req, resp) => {
-        const id = Number.parseInt(req.body.id);
-        if (!isNaN(id)) {
+        const id = req.body.id?.toString();
+        if (id) {
             (0, cart_models_1.removeLine)(req.session.cart, id);
         }
         resp.redirect(`/cart?returnUrl=${(0, querystring_1.escape)(req.body.returnUrl ?? "/")}`);

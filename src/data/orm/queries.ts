@@ -1,51 +1,75 @@
 import { CategoryModel, ProductModel, SupplierModel } from "./models";
 import { BaseRepo, Constructor } from "./core"
 import { ProductQueryParameters } from "../catalog_models";
-import { Op } from "sequelize";
 
 export function AddQueries<TBase extends Constructor<BaseRepo>>(Base: TBase) {
     return class extends Base {
     
         async getProducts(params?: ProductQueryParameters) {
-            const opts: any = {};
-            if (params?.page && params.pageSize) {
-                opts.limit = params?.pageSize,
-                opts.offset = (params.page -1) * params.pageSize                
-            }
+            const filter: any = {};
+            
             if(params?.searchTerm) {
-                const searchOp = { [Op.like]: "%" + params.searchTerm + "%"};
-                opts.where = {
-                    [Op.or]: { name: searchOp, description: searchOp }
-                }
+                filter.$or = [
+                    { name: { $regex: params.searchTerm, $options: "i" } },
+                    { description: { $regex: params.searchTerm, $options: "i" } }
+                ];
             }
+            
             if (params?.category) {
-                opts.where = { 
-                    ...opts.where,  categoryId: params.category
-                }
+                filter.categoryId = params.category;
             }
-            const result = await ProductModel.findAndCountAll({                
-                include: [
-                    {model: SupplierModel, as: "supplier" },
-                    {model: CategoryModel, as: "category"}],
-                raw: true, nest: true,
-                ...opts
-            });               
+            
+            const skip = params?.page && params?.pageSize 
+                ? (params.page - 1) * params.pageSize 
+                : 0;
+            const limit = params?.pageSize || 0;
+            
+            const products = await ProductModel.find(filter)
+                .populate("supplier")
+                .populate("category")
+                .skip(skip)
+                .limit(limit)
+                .lean() as any[];
+                
+            const totalCount = await ProductModel.countDocuments(filter);
             const categories = await this.getCategories();
-            return { products: result.rows, totalCount: result.count, categories };
+            
+            return {
+                products: products.map(p => ({
+                    ...p,
+                    id: p._id.toString ? p._id.toString() : p._id,
+                    categoryId: p.categoryId?.toString ? p.categoryId.toString() : p.categoryId,
+                    supplierId: p.supplierId?.toString ? p.supplierId.toString() : p.supplierId
+                })),
+                totalCount,
+                categories
+            };
         }
 
-        getCategories() {
-            return CategoryModel.findAll({raw: true, nest: true})
+        async getCategories() {
+            const results = await CategoryModel.find().lean() as any[];
+            return results.map(c => ({
+                ...c,
+                id: c._id.toString ? c._id.toString() : c._id
+            }));
         }
     
-        getSuppliers() {
-            return SupplierModel.findAll({raw: true, nest: true});
+        async getSuppliers() {
+            const results = await SupplierModel.find().lean() as any[];
+            return results.map(s => ({
+                ...s,
+                id: s._id.toString ? s._id.toString() : s._id
+            }));
         }        
 
-        getProductDetails(ids: number[]) {
-            return ProductModel.findAll({
-                where: { id: { [Op.in]: ids }}, raw: true, nest: true, 
-            });
+        async getProductDetails(ids: string[]) {
+            const results = await ProductModel.find({ _id: { $in: ids } }).lean() as any[];
+            return results.map(p => ({
+                ...p,
+                id: p._id.toString ? p._id.toString() : p._id,
+                categoryId: p.categoryId?.toString ? p.categoryId.toString() : p.categoryId,
+                supplierId: p.supplierId?.toString ? p.supplierId.toString() : p.supplierId
+            }));
         }
     }
 }

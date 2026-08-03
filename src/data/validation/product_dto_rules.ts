@@ -4,12 +4,12 @@ import { ValidationStatus } from ".";
 import { CategoryModel, SupplierModel } from "../orm/models";
 
 type ProductDTO = {
-    name: string, description: string, categoryId: number, 
-    supplierId: number, price: number
+    name: string, description: string, categoryId: string, 
+    supplierId: string, price: number
 }
 
 const supplierExists = async (status: ValidationStatus) => {
-    const count = await SupplierModel.count({ where: { id: status.value } });
+    const count = await SupplierModel.countDocuments({ _id: status.value });
     if (count !== 1) {
         status.setInvalid(true);
         status.messages.push("A valid supplier is required");        
@@ -17,7 +17,7 @@ const supplierExists = async (status: ValidationStatus) => {
 }
 
 const categoryExists = async (status: ValidationStatus) => {
-    const count = await CategoryModel.count({ where: { id: status.value } });
+    const count = await CategoryModel.countDocuments({ _id: status.value });
     if (count !== 1) {
         status.setInvalid(true);
         status.messages.push("A valid category is required");        

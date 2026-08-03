@@ -31,7 +31,7 @@ export const createOrderRoutes = (app: Express) => {
                 customer: await CustomerValidator.validate(req.user),
                 address: await AddressValidator.validate(
                     await customer_repository.getCustomerAddress(
-                        req.user?.id ?? 0) ?? {})   
+                        req.user?.id ?? "") ?? {})   
             }
         }
 
