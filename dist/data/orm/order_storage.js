@@ -14,7 +14,12 @@ function AddOrderStorage(Base) {
             session.startTransaction();
             try {
                 const { id, shipped } = order;
-                let stored = await order_models_1.OrderModel.findByIdAndUpdate(id, { shipped }, { upsert: true, new: true, session });
+                let stored = id
+                    ? await order_models_1.OrderModel.findByIdAndUpdate(id, { shipped }, { upsert: true, returnDocument: "after", session })
+                    : new order_models_1.OrderModel({ shipped });
+                if (!stored) {
+                    stored = new order_models_1.OrderModel({ _id: id, shipped });
+                }
                 if (order.customer) {
                     let customer = await customer_models_1.CustomerModel.findOne({ email: order.customer.email }, null, { session });
                     if (!customer) {
@@ -33,8 +38,11 @@ function AddOrderStorage(Base) {
                 }
                 await stored.save({ session });
                 if (order.selections) {
+                    await order_models_1.ProductSelectionModel.deleteMany({ orderId: stored._id }, { session });
                     const sels = await order_models_1.ProductSelectionModel.insertMany(order.selections.map(s => ({
-                        ...s,
+                        productId: s.productId,
+                        quantity: s.quantity,
+                        price: s.price,
                         orderId: stored._id
                     })), { session });
                     stored.selections = sels;

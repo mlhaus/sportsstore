@@ -17,7 +17,30 @@ const productSelectionSchema = new mongoose_1.Schema({
 const orderSchema = new mongoose_1.Schema({
     shipped: { type: Boolean, default: false },
     customerId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Customer", required: true },
-    addressId: { type: mongoose_1.Schema.Types.ObjectId, required: true }
+    addressId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Address", required: true }
+});
+productSelectionSchema.virtual("product", {
+    ref: "Product",
+    localField: "productId",
+    foreignField: "_id",
+    justOne: true
+});
+orderSchema.virtual("customer", {
+    ref: "Customer",
+    localField: "customerId",
+    foreignField: "_id",
+    justOne: true
+});
+orderSchema.virtual("address", {
+    ref: "Address",
+    localField: "addressId",
+    foreignField: "_id",
+    justOne: true
+});
+orderSchema.virtual("selections", {
+    ref: "ProductSelection",
+    localField: "_id",
+    foreignField: "orderId"
 });
 exports.AddressModel = (0, mongoose_1.model)("Address", addressSchema);
 exports.ProductSelectionModel = (0, mongoose_1.model)("ProductSelection", productSelectionSchema);

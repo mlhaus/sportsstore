@@ -16,12 +16,17 @@ export function AddOrderStorage<TBase extends
 
             try {
                 const { id, shipped } = order;
-                
-                let stored = await OrderModel.findByIdAndUpdate(
-                    id,
-                    { shipped },
-                    { upsert: true, new: true, session }
-                );
+                let stored = id
+                    ? await OrderModel.findByIdAndUpdate(
+                        id,
+                        { shipped },
+                        { upsert: true, returnDocument: "after", session }
+                    )
+                    : new OrderModel({ shipped });
+
+                if (!stored) {
+                    stored = new OrderModel({ _id: id, shipped });
+                }
                 
                 if (order.customer) {
                     let customer = await CustomerModel.findOne(
@@ -56,9 +61,16 @@ export function AddOrderStorage<TBase extends
                 await stored.save({ session });
 
                 if (order.selections) {
+                    await ProductSelectionModel.deleteMany(
+                        { orderId: stored._id },
+                        { session }
+                    );
+
                     const sels = await ProductSelectionModel.insertMany(
                         order.selections.map(s => ({
-                            ...s,
+                            productId: s.productId,
+                            quantity: s.quantity,
+                            price: s.price,
                             orderId: stored._id
                         })),
                         { session }
