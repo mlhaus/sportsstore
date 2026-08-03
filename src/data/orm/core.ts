@@ -3,6 +3,7 @@ import { getConfig, getSecret } from "../../config";
 import { initializeModels, CategoryModel, ProductModel, SupplierModel } 
     from "./models";
 import { readFileSync } from "fs";
+import { resolve } from "path";
 
 const config = getConfig("catalog:orm_repo");
 
@@ -36,9 +37,11 @@ export class BaseRepo {
     }
 
     async clearAndSeedData() {
-        const data = JSON.parse(readFileSync(config.seed_file).toString());
-        
         try {
+            // Resolve path to handle both local dev and Vercel deployment
+            const seedPath = resolve(process.cwd(), config.seed_file);
+            const data = JSON.parse(readFileSync(seedPath).toString());
+            
             await SupplierModel.deleteMany({});
             await CategoryModel.deleteMany({});
             await ProductModel.deleteMany({});

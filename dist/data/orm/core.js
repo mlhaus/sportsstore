@@ -8,6 +8,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const config_1 = require("../../config");
 const models_1 = require("./models");
 const fs_1 = require("fs");
+const path_1 = require("path");
 const config = (0, config_1.getConfig)("catalog:orm_repo");
 class BaseRepo {
     constructor() {
@@ -33,8 +34,10 @@ class BaseRepo {
         }
     }
     async clearAndSeedData() {
-        const data = JSON.parse((0, fs_1.readFileSync)(config.seed_file).toString());
         try {
+            // Resolve path to handle both local dev and Vercel deployment
+            const seedPath = (0, path_1.resolve)(process.cwd(), config.seed_file);
+            const data = JSON.parse((0, fs_1.readFileSync)(seedPath).toString());
             await models_1.SupplierModel.deleteMany({});
             await models_1.CategoryModel.deleteMany({});
             await models_1.ProductModel.deleteMany({});
