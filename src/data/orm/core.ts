@@ -38,16 +38,21 @@ export class BaseRepo {
 
     async clearAndSeedData() {
         try {
-            // In Vercel, __dirname is /var/task/data/orm/
-            // We need to find products.json at /var/task/products.json
-            // Try these paths:
-            // 1. Two levels up from orm/ -> /var/task/
-            // 2. Local dev: three levels up (dist/data/orm/ -> dist/ -> root/source/)
-            // 3. Very local dev: four levels up
+            // In Vercel, Mongoose is already connected to MongoDB Atlas
+            // Skip file-based seeding in production (too fragile with file paths)
+            // Data should be pre-seeded in MongoDB or seeded via separate admin script
+            if (process.env.NODE_ENV === 'production') {
+                if (config.logging) {
+                    console.log("Skipping database seeding in production");
+                }
+                return;
+            }
+
+            // Try to find products.json in local development
             const pathsToTry = [
-                join(__dirname, '../../', config.seed_file),         // /var/task/products.json (Vercel)
-                join(__dirname, '../../../', config.seed_file),      // dist/products.json (local)
-                join(__dirname, '../../../../', config.seed_file)    // root/products.json (local dev)
+                join(__dirname, '../../', config.seed_file),         // dist/products.json
+                join(__dirname, '../../../', config.seed_file),      // root/products.json
+                join(__dirname, '../../../../', config.seed_file)    // parent/products.json
             ];
             
             let fileContent: string = '';
@@ -62,7 +67,6 @@ export class BaseRepo {
                     }
                     break;
                 } catch (e) {
-                    // Continue to next path
                     if (config.logging) {
                         console.log(`Seed file not found at: ${tryPath}`);
                     }

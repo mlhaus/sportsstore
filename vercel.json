@@ -5,7 +5,13 @@
       "src": "dist/server.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["server.config.json"]
+        "includeFiles": [
+          "dist/**",
+          "dist/products.json",
+          "dist/server.config.json",
+          "dist/production.server.config.json",
+          "dist/templates/**"
+        ]
       }
     }
   ],
