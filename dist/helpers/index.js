@@ -36,15 +36,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createTemplates = void 0;
 const config_1 = require("../config");
 const express_handlebars_1 = require("express-handlebars");
+const path_1 = require("path");
 const env_helpers = __importStar(require("./env"));
 const catalog_helpers = __importStar(require("./catalog_helpers"));
 const cart_helpers = __importStar(require("./cart_helpers"));
 const order_helpers = __importStar(require("./order_helpers"));
 const admin_helpers = __importStar(require("./admin_helpers"));
-const location = (0, config_1.getConfig)("templates:location");
 const config = (0, config_1.getConfig)("templates:config");
 const createTemplates = (app) => {
-    app.set("views", location);
+    // Resolve templates directory path relative to dist
+    // In production (Vercel), templates are in dist/templates
+    // In development, they're in templates/
+    const templatesDir = (0, path_1.join)(__dirname, "../templates");
+    app.set("views", templatesDir);
     app.engine("handlebars", (0, express_handlebars_1.engine)({
         ...config,
         helpers: { ...env_helpers, ...catalog_helpers, ...cart_helpers,

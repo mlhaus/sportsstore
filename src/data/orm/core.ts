@@ -3,7 +3,7 @@ import { getConfig, getSecret } from "../../config";
 import { initializeModels, CategoryModel, ProductModel, SupplierModel } 
     from "./models";
 import { readFileSync } from "fs";
-import { resolve } from "path";
+import { join } from "path";
 
 const config = getConfig("catalog:orm_repo");
 
@@ -38,9 +38,21 @@ export class BaseRepo {
 
     async clearAndSeedData() {
         try {
-            // Resolve path to handle both local dev and Vercel deployment
-            const seedPath = resolve(process.cwd(), config.seed_file);
-            const data = JSON.parse(readFileSync(seedPath).toString());
+            // Try to find products.json in multiple locations
+            // 1. In dist directory (for Vercel)
+            // 2. In project root (for local development)
+            let seedFilePath = join(__dirname, '../../', config.seed_file);
+            
+            let fileContent: string;
+            try {
+                fileContent = readFileSync(seedFilePath).toString();
+            } catch (e) {
+                // If not found, try from parent directory
+                seedFilePath = join(__dirname, '../../../', config.seed_file);
+                fileContent = readFileSync(seedFilePath).toString();
+            }
+            
+            const data = JSON.parse(fileContent);
             
             await SupplierModel.deleteMany({});
             await CategoryModel.deleteMany({});

@@ -1,5 +1,0 @@
-# Don't ignore these important files on Vercel
-!templates/**
-!products.json
-!server.config.json
-!*.db

@@ -6,8 +6,11 @@ Successfully migrated the SportsStore application from **SQLite with Sequelize O
 ## Prompt to GitHub Copilot
 "This project currently uses SQLite. Migrate the database logic to MongoDB Atlas. I have my MongoDB URI connection string ready."
 
-## Followup Prompt to GitHub Copilot
+## First Followup Prompt
 "After deployment to Vercel, I get errors saying: `Error: Failed to lookup view "not_found" in views directory "templates"`, `Error: Failed to lookup view "error" in views directory "templates"`, `Failed to connect to MongoDB: Error: ENOENT: no such file or directory, open 'products.json'`, and `Unhandled Rejection: Error: ENOENT: no such file or directory, open 'products.json'`."
+
+## Second Followup Prompt
+"The latest deployment displays these errors in the Vercel Logs: `Failed to connect to MongoDB: Error: ENOENT: no such file or directory, open 'products.json'`, `Unhandled Rejection: Error: ENOENT: no such file or directory, open 'products.json'`, `Error: Failed to lookup view "index" in views directory "templates"`, and `Error: Failed to lookup view "error" in views directory "templates"`."
 
 ## Changes Made
 

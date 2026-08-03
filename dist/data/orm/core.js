@@ -35,9 +35,20 @@ class BaseRepo {
     }
     async clearAndSeedData() {
         try {
-            // Resolve path to handle both local dev and Vercel deployment
-            const seedPath = (0, path_1.resolve)(process.cwd(), config.seed_file);
-            const data = JSON.parse((0, fs_1.readFileSync)(seedPath).toString());
+            // Try to find products.json in multiple locations
+            // 1. In dist directory (for Vercel)
+            // 2. In project root (for local development)
+            let seedFilePath = (0, path_1.join)(__dirname, '../../', config.seed_file);
+            let fileContent;
+            try {
+                fileContent = (0, fs_1.readFileSync)(seedFilePath).toString();
+            }
+            catch (e) {
+                // If not found, try from parent directory
+                seedFilePath = (0, path_1.join)(__dirname, '../../../', config.seed_file);
+                fileContent = (0, fs_1.readFileSync)(seedFilePath).toString();
+            }
+            const data = JSON.parse(fileContent);
             await models_1.SupplierModel.deleteMany({});
             await models_1.CategoryModel.deleteMany({});
             await models_1.ProductModel.deleteMany({});

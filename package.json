@@ -7,6 +7,7 @@
         "watch": "tsc-watch --noClear --onsuccess \"node dist/server.js\"",
         "server": "nodemon --exec npm run watch",
         "client": "webpack serve",
+        "prebuild": "node scripts/copy-assets.js",
         "build": "tsc && webpack --mode production",
         "start": "node dist/server.js"
     },
