@@ -1,7 +1,11 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AddQueries = AddQueries;
 const models_1 = require("./models");
+const mongoose_1 = __importDefault(require("mongoose"));
 function AddQueries(Base) {
     return class extends Base {
         async getProducts(params) {
@@ -53,7 +57,11 @@ function AddQueries(Base) {
             }));
         }
         async getProductDetails(ids) {
-            const results = await models_1.ProductModel.find({ _id: { $in: ids } }).lean();
+            const validIds = ids.filter(id => mongoose_1.default.Types.ObjectId.isValid(id));
+            if (validIds.length === 0) {
+                return [];
+            }
+            const results = await models_1.ProductModel.find({ _id: { $in: validIds } }).lean();
             return results.map(p => ({
                 ...p,
                 id: p._id.toString ? p._id.toString() : p._id,

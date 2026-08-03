@@ -18,7 +18,10 @@ export const getCartDetail = async (cart: Cart) : Promise<CartDetail> => {
 
     const products = Object.fromEntries(db_data.map(p => [p.id, p]));
 
-    const lines = cart.lines.map(line => ({ 
+    const validLines = cart.lines.filter(line => products[line.productId] !== undefined);
+    cart.lines = validLines;
+
+    const lines = validLines.map(line => ({
         product: products[line.productId],
         quantity: line.quantity,
         subtotal: products[line.productId].price * line.quantity

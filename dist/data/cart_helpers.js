@@ -6,7 +6,9 @@ const getCartDetail = async (cart) => {
     const ids = cart.lines.map(l => l.productId);
     const db_data = await _1.catalog_repository.getProductDetails(ids);
     const products = Object.fromEntries(db_data.map(p => [p.id, p]));
-    const lines = cart.lines.map(line => ({
+    const validLines = cart.lines.filter(line => products[line.productId] !== undefined);
+    cart.lines = validLines;
+    const lines = validLines.map(line => ({
         product: products[line.productId],
         quantity: line.quantity,
         subtotal: products[line.productId].price * line.quantity

@@ -1,6 +1,7 @@
 import { CategoryModel, ProductModel, SupplierModel } from "./models";
 import { BaseRepo, Constructor } from "./core"
 import { ProductQueryParameters } from "../catalog_models";
+import mongoose from "mongoose";
 
 export function AddQueries<TBase extends Constructor<BaseRepo>>(Base: TBase) {
     return class extends Base {
@@ -63,7 +64,12 @@ export function AddQueries<TBase extends Constructor<BaseRepo>>(Base: TBase) {
         }        
 
         async getProductDetails(ids: string[]) {
-            const results = await ProductModel.find({ _id: { $in: ids } }).lean() as any[];
+            const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
+            if (validIds.length === 0) {
+                return [];
+            }
+
+            const results = await ProductModel.find({ _id: { $in: validIds } }).lean() as any[];
             return results.map(p => ({
                 ...p,
                 id: p._id.toString ? p._id.toString() : p._id,
