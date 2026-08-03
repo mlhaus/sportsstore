@@ -1,1 +1,0 @@
-{"version":3,"file":"bundle.js","mappings":"AAAAA,SAASC,iBAAiB,oBAAoB","sources":["webpack://sportsstore/./src/admin/client.js"],"sourcesContent":["document.addEventListener('DOMContentLoaded', () => {\n    // do nothing\n});\n"],"names":["document","addEventListener"],"sourceRoot":""}
