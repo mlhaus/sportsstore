@@ -46,15 +46,15 @@ const config = (0, config_1.getConfig)("templates:config");
 const createTemplates = (app) => {
     // Resolve templates directory path relative to __dirname
     // In Vercel: __dirname = /var/task/dist/helpers
-    //   - ../.. = /var/task/dist
-    //   - ../../.. = /var/task/ (then ../templates = /var/task/templates)
+    //   - ../../ = /var/task/ 
+    //   - ../../templates = /var/task/templates ✓
     // In local dev: __dirname = dist/helpers
-    //   - ../.. = dist
-    //   - ../../.. would go to parent, use ../ instead = dist/templates
+    //   - ../ = dist
+    //   - ../templates = dist/templates ✓
     let templatesDir;
     if (process.env.VERCEL) {
-        // In Vercel, go up 3 levels to escape dist/ nesting: dist/helpers -> /var/task/templates
-        templatesDir = (0, path_1.join)(__dirname, "../../../templates");
+        // In Vercel, go up 2 levels to reach templates: dist/helpers -> /var/task/ -> templates
+        templatesDir = (0, path_1.join)(__dirname, "../../templates");
         console.log(`[VERCEL] __dirname = ${__dirname}`);
         console.log(`[VERCEL] templatesDir = ${templatesDir}`);
     }
