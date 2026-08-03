@@ -2,17 +2,23 @@ import { readFileSync } from "fs";
 import { getEnvironment, Env } from "./environment";
 import { merge } from "./merge";
 import { config as dotenvconfig } from "dotenv";
+import { join } from "path";
 
-const file = process.env.SERVER_CONFIG ?? "server.config.json"
-const data = JSON.parse(readFileSync(file).toString());
+// Resolve config file path relative to compiled code (dist/)
+// In Vercel: __dirname = /var/task/config, so ../server.config.json = /var/task/server.config.json
+// In local: __dirname = dist/config, so ../server.config.json = dist/server.config.json
+const configFileName = process.env.SERVER_CONFIG ?? "server.config.json";
+const configPath = join(__dirname, "..", configFileName);
+const data = JSON.parse(readFileSync(configPath).toString());
 
 dotenvconfig({
     path: getEnvironment().toString() + ".env"
 })
 
 try {
-    const envFile = getEnvironment().toString() + "." + file;
-    const envData = JSON.parse(readFileSync(envFile).toString());
+    const envFile = getEnvironment().toString() + "." + configFileName;
+    const envConfigPath = join(__dirname, "..", envFile);
+    const envData = JSON.parse(readFileSync(envConfigPath).toString());
     merge(data, envData);
 } catch {
     // do nothing - file doesn't exist or isn't readable
