@@ -12,6 +12,29 @@ Successfully migrated the SportsStore application from **SQLite with Sequelize O
 ## Second Followup Prompt
 "The latest deployment displays these errors in the Vercel Logs: `Failed to connect to MongoDB: Error: ENOENT: no such file or directory, open 'products.json'`, `Unhandled Rejection: Error: ENOENT: no such file or directory, open 'products.json'`, `Error: Failed to lookup view "index" in views directory "templates"`, and `Error: Failed to lookup view "error" in views directory "templates"`."
 
+## Third Followup Prompt
+"The error I get now says Error: ENOENT: no such file or directory, open 'server.config.json'. That file was previously included in the vercel.json file."
+```
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "dist/server.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["server.config.json"]
+      }
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/dist/server.js"
+    }
+  ]
+}
+```
+
 ## Changes Made
 
 ### 1. Dependencies Updated
