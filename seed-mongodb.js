@@ -34,9 +34,19 @@ async function seed() {
         const seedData = JSON.parse(fs.readFileSync(seedPath, 'utf-8'));
         
         // Define schemas
-        const supplierSchema = new mongoose.Schema({}, { strict: false });
-        const categorySchema = new mongoose.Schema({}, { strict: false });
-        const productSchema = new mongoose.Schema({}, { strict: false });
+        const supplierSchema = new mongoose.Schema({
+            name: { type: String, required: true }
+        });
+        const categorySchema = new mongoose.Schema({
+            name: { type: String, required: true }
+        });
+        const productSchema = new mongoose.Schema({
+            name: { type: String, required: true },
+            description: { type: String, required: true },
+            price: { type: Number, required: true },
+            categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+            supplierId: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier' }
+        });
 
         const Supplier = mongoose.model('Supplier', supplierSchema);
         const Category = mongoose.model('Category', categorySchema);
@@ -50,14 +60,37 @@ async function seed() {
 
         // Insert seed data
         console.log('📝 Inserting seed data...');
-        await Supplier.insertMany(seedData.suppliers);
-        console.log(`  ✅ ${seedData.suppliers.length} suppliers`);
+        const insertedSuppliers = await Supplier.insertMany(
+            seedData.suppliers.map((supplier) => ({
+                name: supplier.name
+            }))
+        );
+        console.log(`  ✅ ${insertedSuppliers.length} suppliers`);
         
-        await Category.insertMany(seedData.categories);
-        console.log(`  ✅ ${seedData.categories.length} categories`);
-        
-        await Product.insertMany(seedData.products);
-        console.log(`  ✅ ${seedData.products.length} products`);
+        const insertedCategories = await Category.insertMany(
+            seedData.categories.map((category) => ({
+                name: category.name
+            }))
+        );
+        console.log(`  ✅ ${insertedCategories.length} categories`);
+
+        const supplierIds = new Map(
+            seedData.suppliers.map((supplier, index) => [supplier.id, insertedSuppliers[index]._id])
+        );
+        const categoryIds = new Map(
+            seedData.categories.map((category, index) => [category.id, insertedCategories[index]._id])
+        );
+
+        const insertedProducts = await Product.insertMany(
+            seedData.products.map((product) => ({
+                name: product.name,
+                description: product.description,
+                price: product.price,
+                categoryId: categoryIds.get(product.categoryId),
+                supplierId: supplierIds.get(product.supplierId)
+            }))
+        );
+        console.log(`  ✅ ${insertedProducts.length} products`);
 
         console.log('\n🎉 Database seeded successfully!');
         console.log('Your Vercel app can now run without file-based seeding.');

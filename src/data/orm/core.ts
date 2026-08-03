@@ -83,9 +83,38 @@ export class BaseRepo {
             await CategoryModel.deleteMany({});
             await ProductModel.deleteMany({});
             
-            await SupplierModel.insertMany(data.suppliers);
-            await CategoryModel.insertMany(data.categories);
-            await ProductModel.insertMany(data.products);
+            const insertedSuppliers = await SupplierModel.insertMany(
+                data.suppliers.map((supplier: { name: string }) => ({
+                    name: supplier.name
+                }))
+            );
+            const insertedCategories = await CategoryModel.insertMany(
+                data.categories.map((category: { name: string }) => ({
+                    name: category.name
+                }))
+            );
+
+            const supplierIds = new Map(
+                data.suppliers.map((supplier: { id: number }, index: number) =>
+                    [supplier.id, insertedSuppliers[index]._id])
+            );
+            const categoryIds = new Map(
+                data.categories.map((category: { id: number }, index: number) =>
+                    [category.id, insertedCategories[index]._id])
+            );
+
+            await ProductModel.insertMany(
+                data.products.map((product: {
+                    name: string; description: string; price: number;
+                    categoryId: number; supplierId: number;
+                }) => ({
+                    name: product.name,
+                    description: product.description,
+                    price: product.price,
+                    categoryId: categoryIds.get(product.categoryId),
+                    supplierId: supplierIds.get(product.supplierId)
+                }))
+            );
             
             if (config.logging) {
                 console.log("Database seeded successfully");
