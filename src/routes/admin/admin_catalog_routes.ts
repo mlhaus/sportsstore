@@ -3,14 +3,36 @@ import { CategoryModel, ProductModel, SupplierModel }
     from "../../data/orm/models";
 import { ProductDTOValidator, getData, isValid } from "../../data/validation";
 
+const asId = (value: any) => value?.toString ? value.toString() : value;
+
+const mapLookupValues = (values: any[]) => values.map(value => ({
+    ...value,
+    id: asId(value._id)
+}));
+
+const mapProductValues = (products: any[]) => products.map(product => ({
+    ...product,
+    id: asId(product._id),
+    categoryId: asId(product.categoryId?._id ?? product.categoryId),
+    supplierId: asId(product.supplierId?._id ?? product.supplierId),
+    category: product.categoryId
+        ? { ...product.categoryId, id: asId(product.categoryId._id) }
+        : undefined,
+    supplier: product.supplierId
+        ? { ...product.supplierId, id: asId(product.supplierId._id) }
+        : undefined
+}));
+
 export const createAdminCatalogRoutes = (router: Router) => {
 
     router.get("/table", async (req, resp) => {
         const products = await ProductModel.find()
                 .populate("supplierId")
                 .populate("categoryId")
-                .lean();
-        resp.render("admin/product_table", { products });
+                .lean() as any[];
+        resp.render("admin/product_table", {
+            products: mapProductValues(products)
+        });
     });
 
     router.delete("/:id", async (req, resp) => {
@@ -26,12 +48,16 @@ export const createAdminCatalogRoutes = (router: Router) => {
 
     router.get("/edit/:id", async (req, resp) => {
         const id = req.params.id;
-        const product = await ProductModel.findById(id).lean();
+        const product = await ProductModel.findById(id).lean() as any;
         const data = {
             product: { id: { value: id },
-                ...await ProductDTOValidator.validate(product)},
-            suppliers: await SupplierModel.find().lean(),
-            categories: await CategoryModel.find().lean()
+                ...await ProductDTOValidator.validate({
+                    ...product,
+                    categoryId: asId(product?.categoryId),
+                    supplierId: asId(product?.supplierId)
+                })},
+            suppliers: mapLookupValues(await SupplierModel.find().lean() as any[]),
+            categories: mapLookupValues(await CategoryModel.find().lean() as any[])
         };
         resp.render("admin/product_editor", data);
     });
@@ -47,8 +73,8 @@ export const createAdminCatalogRoutes = (router: Router) => {
         } else {
             resp.render("admin/product_editor", {
                 product: { id: { value: req.params.id} , ...validation },
-                suppliers: await SupplierModel.find().lean(),
-                categories: await CategoryModel.find().lean()
+                suppliers: mapLookupValues(await SupplierModel.find().lean() as any[]),
+                categories: mapLookupValues(await CategoryModel.find().lean() as any[])
             })
         }
     });    
@@ -56,8 +82,8 @@ export const createAdminCatalogRoutes = (router: Router) => {
     router.get("/create", async (req, resp) => {
         const data = {
             product: {},
-            suppliers: await SupplierModel.find().lean(),
-            categories: await CategoryModel.find().lean(),
+            suppliers: mapLookupValues(await SupplierModel.find().lean() as any[]),
+            categories: mapLookupValues(await CategoryModel.find().lean() as any[]),
             create: true
         };
         resp.render("admin/product_editor", data);
@@ -71,8 +97,8 @@ export const createAdminCatalogRoutes = (router: Router) => {
         } else {
             resp.render("admin/product_editor", {
                 product: validation,
-                suppliers: await SupplierModel.find().lean(),
-                categories: await CategoryModel.find().lean(),
+                suppliers: mapLookupValues(await SupplierModel.find().lean() as any[]),
+                categories: mapLookupValues(await CategoryModel.find().lean() as any[]),
                 create: true
             })
         }
