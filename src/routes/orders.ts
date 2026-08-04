@@ -1,4 +1,4 @@
-import { Express } from "express";
+import { Express, Request } from "express";
 import { Address } from "../data/order_models";
 import { AddressValidator, CustomerValidator, ValidationResults, getData, isValid } 
     from "../data/validation";
@@ -18,6 +18,9 @@ declare module "express-session" {
 }
 
 export const createOrderRoutes = (app: Express) => {
+
+    const saveSession = (req: Request) => new Promise<void>((resolve, reject) =>
+        req.session.save(error => error ? reject(error) : resolve()));
 
     app.get("/checkout/google", passport.authenticate("google"));
 
@@ -56,10 +59,11 @@ export const createOrderRoutes = (app: Express) => {
             const order = await createAndStoreOrder(
                 getData(data.customer), getData(data.address), 
                     req.session.cart
-            )
-            resp.redirect(`/checkout/${order.id}`);
+            );
             req.session.cart = undefined;
             req.session.orderData = undefined;
+            await saveSession(req);
+            resp.redirect(`/checkout/${order.id}`);
         } else {
             resp.redirect("/checkout");
         }

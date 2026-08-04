@@ -9,6 +9,7 @@ const order_helpers_1 = require("./order_helpers");
 const data_1 = require("../data");
 const passport_1 = __importDefault(require("passport"));
 const createOrderRoutes = (app) => {
+    const saveSession = (req) => new Promise((resolve, reject) => req.session.save(error => error ? reject(error) : resolve()));
     app.get("/checkout/google", passport_1.default.authenticate("google"));
     app.get("/signin-google", passport_1.default.authenticate("google", { successRedirect: "/checkout", keepSessionInfo: true }));
     app.get("/checkout", async (req, resp) => {
@@ -35,9 +36,10 @@ const createOrderRoutes = (app) => {
         if ((0, validation_1.isValid)(data.customer) && (0, validation_1.isValid)(data.address)
             && req.session.cart) {
             const order = await (0, order_helpers_1.createAndStoreOrder)((0, validation_1.getData)(data.customer), (0, validation_1.getData)(data.address), req.session.cart);
-            resp.redirect(`/checkout/${order.id}`);
             req.session.cart = undefined;
             req.session.orderData = undefined;
+            await saveSession(req);
+            resp.redirect(`/checkout/${order.id}`);
         }
         else {
             resp.redirect("/checkout");
