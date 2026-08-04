@@ -20,9 +20,9 @@
                 {{else }}
                     <th colspan="3"></th>
                 {{/if}}
-                <td>{{product.name}}</td>
+                <td>{{#if product}}{{product.name}}{{else}}Unavailable product{{/if}}</td>
                 <td>{{ quantity }}</td>
-                <td>{{currency product.price}}</td>
+                <td>{{currency price}}</td>
                 {{#if (first @index)}}
                     {{> admin/order_button id=../id shipped=../shipped}}
                 {{else}}

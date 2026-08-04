@@ -9,5 +9,5 @@ const selected = (val1, val2) => val1 == val2 ? "selected" : "";
 exports.selected = selected;
 const first = (index) => index == 0;
 exports.first = first;
-const total = (sels) => sels.reduce((total, s) => total += (s.quantity * s.product.price), 0);
+const total = (sels) => sels.reduce((total, s) => total += (s.quantity * (s.price ?? s.product?.price ?? 0)), 0);
 exports.total = total;
