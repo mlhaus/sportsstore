@@ -20,6 +20,7 @@ expressApp.use(express.urlencoded({extended: true}))
 
 expressApp.use("/css", express.static(join(__dirname, "css")));
 expressApp.use("/font", express.static(join(__dirname, "font")));
+expressApp.use("/font/fonts", express.static(join(__dirname, "fonts")));
 expressApp.use("/fonts", express.static(join(__dirname, "fonts")));
 expressApp.use("/admin", express.static(join(__dirname, "admin")));
 expressApp.get("/htmx.min.js", (req, resp) =>

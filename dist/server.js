@@ -21,6 +21,7 @@ expressApp.use(express_1.default.json());
 expressApp.use(express_1.default.urlencoded({ extended: true }));
 expressApp.use("/css", express_1.default.static((0, path_1.join)(__dirname, "css")));
 expressApp.use("/font", express_1.default.static((0, path_1.join)(__dirname, "font")));
+expressApp.use("/font/fonts", express_1.default.static((0, path_1.join)(__dirname, "fonts")));
 expressApp.use("/fonts", express_1.default.static((0, path_1.join)(__dirname, "fonts")));
 expressApp.use("/admin", express_1.default.static((0, path_1.join)(__dirname, "admin")));
 expressApp.get("/htmx.min.js", (req, resp) => resp.sendFile((0, path_1.join)(__dirname, "htmx.min.js")));
