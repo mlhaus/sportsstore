@@ -1,8 +1,25 @@
 import { Router } from "express";
-import { AddressModel, OrderModel, ProductSelectionModel } 
-    from "../../data/orm/models/order_models";
-import { CustomerModel } from "../../data/orm/models/customer_models";
-import { ProductModel } from "../../data/orm/models";
+import { OrderModel } from "../../data/orm/models/order_models";
+import "../../data/orm/models/customer_models";
+import "../../data/orm/models/catalog_models";
+
+const asId = (value: any) => value?.toString ? value.toString() : value;
+
+const mapOrders = (orders: any[]) => orders.map(order => ({
+    ...order,
+    id: asId(order._id),
+    customerId: asId(order.customerId),
+    addressId: asId(order.addressId),
+    selections: (order.selections ?? []).map((selection: any) => ({
+        ...selection,
+        id: asId(selection._id),
+        productId: asId(selection.productId?._id ?? selection.productId),
+        orderId: asId(selection.orderId),
+        product: selection.product
+            ? { ...selection.product, id: asId(selection.product._id) }
+            : undefined
+    }))
+}));
 
 export const createAdminOrderRoutes = (router: Router) => {
 
@@ -17,9 +34,9 @@ export const createAdminOrderRoutes = (router: Router) => {
                 }
             })
             .sort({ shipped: 1, _id: 1 })
-            .lean();
+            .lean() as any[];
 
-        resp.render("admin/order_table", { orders });
+        resp.render("admin/order_table", { orders: mapOrders(orders) });
     });
 
     router.post("/ship", async (req, resp) => {
@@ -27,7 +44,7 @@ export const createAdminOrderRoutes = (router: Router) => {
         const result = await OrderModel.findByIdAndUpdate(
             id,
             { shipped },
-            { new: true }
+            { returnDocument: "after" }
         );
         
         if (result) {
