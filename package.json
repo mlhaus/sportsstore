@@ -2,7 +2,7 @@
     "name": "sportsstore",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
+    "main": "dist/server.js",
     "scripts": {
         "watch": "tsc-watch --noClear --onsuccess \"node dist/server.js\"",
         "server": "nodemon --exec npm run watch",
