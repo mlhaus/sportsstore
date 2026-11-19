@@ -10,7 +10,7 @@ import { createAuthentication } from "./authentication";
 import httpProxy from "http-proxy";
 import { join } from "path";
 
-const port = getConfig("http:port", 3000);
+const port = Number(process.env.PORT) || getConfig("http:port", 3000);
 
 const expressApp: Express = express();
 

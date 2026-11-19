@@ -8,6 +8,7 @@ var Env;
 })(Env || (exports.Env = Env = {}));
 const getEnvironment = () => {
     const env = process.env.NODE_ENV;
+    console.log(`Current environment: ${env}`);
     return env === undefined || env === Env.Development
         ? Env.Development : Env.Production;
 };
